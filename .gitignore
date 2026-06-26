@@ -1,0 +1,21 @@
+dataset/
+.DS_Store
+.localized
+.localized.DS_Store
+
+# Local tooling and caches
+.claude/
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+PyTorch/venv/
+TensorFlow/venv/
+
+# Large local datasets and generated experiment outputs
+TensorFlow/data/
+TensorFlow/experiments/
+TensorFlow/results/
+docs/intermediate/
