@@ -184,5 +184,6 @@ This work was completed as part of a course project at **Yuan Ze University**, D
 
 ## License
 
-This project is released for academic and educational use only.
-# final_project
+This project is released for educational use only.
+# final_project_Generative_AI_class
+
