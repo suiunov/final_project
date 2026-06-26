@@ -1,76 +1,188 @@
-# [SPL 2025] LYT-Net: Lightweight YUV Transformer-based Network for Low-Light Image Enhancement
+# Cross-Domain Low-Light Image Enhancement for Traffic Scenes via a YUV Transformer
 
-<div align="center">
+> Built on [LYT-Net](https://github.com/albrateanu/LYT-Net) — Lightweight YUV Transformer-based Network for Low-light Image Enhancement
 
-![Logo](./figs/Logo.png)
+**Nooruzbek Suiunov, Ezra, Y.C. Chuang** — Department of Computer Science and Engineering, Yuan Ze University, Taiwan
 
-**[Alexandru Brateanu](https://scholar.google.com/citations?user=ru0meGgAAAAJ&hl=en), [Raul Balmez](https://scholar.google.com/citations?user=vPC7raQAAAAJ&hl=en), [Adrian Avram](https://scholar.google.com/citations?user=Wk3IxkEAAAAJ&hl=en), [Ciprian Orhei](https://scholar.google.com/citations?user=DZHdq3wAAAAJ&hl=en), [Cosmin Ancuti](https://scholar.google.com/citations?user=zVTgt8IAAAAJ&hl=en)**
+---
 
+## Overview
 
-**Check out our HuggingFace page for LYT-Net!**
+This project extends LYT-Net with three targeted architectural modifications aimed at improving **cross-domain generalization** for low-light image enhancement in real-world traffic scenarios. The model is trained on LOL-v1 and evaluated on three test sets spanning an increasing distributional gap: the in-domain LOL-v1 set, the cross-domain LOL-v2-Real set, and the outdoor LOLI-Street benchmark — the most semantically relevant testbed for nighttime traffic-sign scenes.
 
-[![HuggingFace](https://img.shields.io/badge/HuggingFace-Model-179bd3)](https://huggingface.co/albrateanu/LYT-Net)
+We introduce three modifications — **D1**, **D2**, and **D3** — that are mutually stabilizing: each individually disrupts the LYT-Net balance, but together they recover in-domain quality while producing cross-domain gains that no subset achieves alone.
 
-[![arXiv](https://img.shields.io/badge/arxiv-paper-179bd3)](https://arxiv.org/abs/2401.15204)
-[![IEEE](https://img.shields.io/badge/IEEE-paper-blue)](https://ieeexplore.ieee.org/abstract/document/10972228)
-	
-<!---[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/lyt-net-lightweight-yuv-transformer-based/low-light-image-enhancement-on-lol)](https://paperswithcode.com/sota/low-light-image-enhancement-on-lol?p=lyt-net-lightweight-yuv-transformer-based)
-	
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/lyt-net-lightweight-yuv-transformer-based/low-light-image-enhancement-on-lolv2)](https://paperswithcode.com/sota/low-light-image-enhancement-on-lolv2?p=lyt-net-lightweight-yuv-transformer-based)
+---
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/lyt-net-lightweight-yuv-transformer-based/low-light-image-enhancement-on-lolv2-1)](https://paperswithcode.com/sota/low-light-image-enhancement-on-lolv2-1?p=lyt-net-lightweight-yuv-transformer-based) -->
+## Modifications over LYT-Net
 
+| ID | Name | Description |
+|----|------|-------------|
+| **D1** | Deeper Per-Channel Feature Extractor | Two stacked 3×3 Conv + ReLU layers per YUV channel branch, enlarging the receptive field and capturing richer low-level features (edges, textures, local contrast) before the global attention stage |
+| **D2** | Bottleneck Dropout Regularization | Dropout (p=0.1) inserted after the Multi-Head Self-Attention module at the chrominance denoiser bottleneck, discouraging memorization of LOL-v1's indoor noise distribution |
+| **D3** | Learnable Luminance Injection Weight | The luminance-to-chrominance coupling coefficient is parameterized as a trainable scalar w_lum (initialized to 0.2), allowing adaptive cross-channel coupling strength to be learned from data |
 
+---
 
-Ranked #1 on FLOPS(G) (3.49 GFLOPS) and Params(M) (0.045M = 45k Params)
-</div>
+## Results
 
-### Abstract
+### Cross-Dataset Quantitative Comparison
 
-*This letter introduces LYT-Net, a novel lightweight transformer-based model for low-light image enhancement (LLIE). LYT-Net consists of several layers and detachable blocks, including our novel blocks--Channel-Wise Denoiser (CWD) and Multi-Stage Squeeze & Excite Fusion (MSEF)--along with the traditional Transformer block, Multi-Headed Self-Attention (MHSA). In our method we adopt a dual-path approach, treating chrominance channels U and V and luminance channel Y as separate entities to help the model better handle illumination adjustment and corruption restoration. Our comprehensive evaluation on established LLIE datasets demonstrates that, despite its low complexity, our model outperforms recent LLIE methods. The source code and pre-trained models are available at [this https URL](https://github.com/albrateanu/LYT-Net).*
+All models trained on **LOL-v1** and evaluated on three test sets without fine-tuning. ↑ higher is better, ↓ lower is better. **Bold** = best in column.
 
+| Method | LOL-v1 PSNR↑ | LOL-v1 SSIM↑ | LOL-v1 LPIPS↓ | LOL-v2-Real PSNR↑ | LOL-v2-Real SSIM↑ | LOL-v2-Real LPIPS↓ | LOLI-Street PSNR↑ | LOLI-Street SSIM↑ | LOLI-Street LPIPS↓ |
+|--------|-------------|-------------|--------------|------------------|------------------|------------------|------------------|------------------|------------------|
+| LYT-Net (baseline) | **22.38** | 0.826 | **0.076** | 22.25 | 0.854 | 0.082 | 14.64 | 0.774 | 0.106 |
+| Ours (D1+D2+D3) | 22.20 | **0.831** | 0.077 | **23.11** | **0.860** | **0.069** | **17.22** | **0.842** | **0.080** |
 
-## 🆕 Updates
-- `28.07.2025` ✨ Check out our new multimodal framework: [**ModalFormer: Multimodal Transformer for Low-Light Image Enhancement**](https://github.com/albrateanu/ModalFormer)! Paper and HF Demo coming soon!
-- `27.07.2025` 🤗 LYT-Net now has a new HuggingFace page! Check it out [here](https://huggingface.co/albrateanu/LYT-Net)! **HF Demo coming soon!** 
-- `09.05.2025` 📢 Check out our other works on [Low-light Image Enhancement](https://github.com/albrateanu/KANT) and [Image Denoising](https://github.com/albrateanu/AKDT)!
-- `21.04.2025` 📝 LYT-Net is published as a IEEE Signal Processing Letters paper. [Link to paper](https://ieeexplore.ieee.org/abstract/document/10972228).
-- `17.07.2024` 🧪 Released rudimentary PyTorch implementation.
-- `03.04.2024` 🔧 Training code re-added and adjusted.
-- `30.01.2024` 📄 arXiv pre-print available.
-- `10.01.2024` 🚀 Pre-trained model weights and code for training and testing are released.
+Key takeaways:
+- **In-domain (LOL-v1):** Comparable performance — only −0.18 dB PSNR, within measurement noise, with improved SSIM (+0.005)
+- **Cross-domain (LOL-v2-Real):** +0.86 dB PSNR / +0.006 SSIM / −0.013 LPIPS
+- **Out-of-domain (LOLI-Street):** **+2.58 dB PSNR / +0.068 SSIM / −0.027 LPIPS**
 
-## 🧪 Experiment
-Please check the ```TensorFlow``` and ```PyTorch``` folders for library-specific implementations.
+---
 
-## 📊 Results
+## Ablation Study
 
-| Dataset  | TensorFlow |           | PyTorch |           |
-|:--------:|:----------:|:---------:|:-------:|:---------:|
-|          | PSNR       | SSIM      | PSNR    | SSIM      |
-|  LOLv1   |  27.23     |  0.853    | 26.63   |  0.836    |
-| LOLv2-R  |  27.80     |  0.873    | 28.41   |  0.878    |
-| LOLv2-S  |  29.39     |  0.939    | 26.72   |  0.928    |
+All variants trained on LOL-v1. Bold = best in column.
 
+| Variant | LOL-v1 PSNR↑ | LOL-v1 SSIM↑ | LOL-v1 LPIPS↓ | LOL-v2-Real PSNR↑ | LOLI-Street PSNR↑ | LOLI-Street SSIM↑ | LOLI-Street LPIPS↓ |
+|---------|-------------|-------------|--------------|------------------|------------------|------------------|------------------|
+| Baseline (LYT-Net) | **22.38** | 0.826 | **0.076** | 22.25 | 14.64 | 0.774 | 0.106 |
+| +D1 only | 19.63 | 0.772 | 0.148 | 19.11 | 14.71 | 0.772 | 0.130 |
+| +D2 only | 19.12 | 0.773 | 0.149 | 20.12 | 17.65 | 0.835 | 0.104 |
+| +D3 only | 18.99 | 0.768 | 0.158 | 19.27 | **18.91** | 0.816 | 0.164 |
+| +D1+D2 | 19.50 | 0.778 | 0.144 | 20.62 | 16.05 | 0.806 | 0.139 |
+| +D1+D3 | 18.96 | 0.764 | 0.160 | 18.32 | 18.67 | 0.817 | 0.128 |
+| +D2+D3 | 18.92 | 0.765 | 0.163 | 19.15 | 17.36 | 0.821 | 0.146 |
+| **D1+D2+D3 (Ours)** | 22.20 | **0.831** | 0.077 | **23.11** | 17.22 | **0.842** | **0.080** |
 
-## 📚 Citation
+Notable findings:
+- **D2 alone** yields the most consistent out-of-domain gain (+3.01 dB on LOLI-Street)
+- **D3 alone** achieves the highest single LOLI-Street PSNR (18.91 dB) but at the cost of severe in-domain regression
+- **Only D1+D2+D3 together** simultaneously recovers in-domain quality and improves on both cross-domain sets
+
+---
+
+## Datasets
+
+| Dataset | Description | Split Used |
+|---------|-------------|------------|
+| [LOL-v1](https://daooshee.github.io/BMVC2018website/) | 485 paired low/normal-light images, predominantly indoor | Training + test (15 pairs) |
+| LOL-v2-Real | 689 training / 100 testing pairs, broader indoor/outdoor scenes | Test only (cross-domain) |
+| [LOLI-Street](https://github.com/md-islam/LoLI-Street) | Outdoor urban driving scenes with traffic signs; 3 illumination subsets (dense, light, moderate) | Validation split (out-of-domain) |
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+cd YOUR_REPO_NAME
+
+# Create a virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
 ```
-@article{brateanu2025lyt,
-  author={Brateanu, Alexandru and Balmez, Raul and Avram, Adrian and Orhei, Ciprian and Ancuti, Cosmin},
-  journal={IEEE Signal Processing Letters}, 
-  title={LYT-NET: Lightweight YUV Transformer-based Network for Low-light Image Enhancement}, 
-  year={2025},
-  volume={},
-  number={},
-  pages={1-5},
-  doi={10.1109/LSP.2025.3563125}}
 
+### Requirements
 
-@article{brateanu2024lyt,
-  title={LYT-Net: Lightweight YUV Transformer-based Network for Low-Light Image Enhancement},
-  author={Brateanu, Alexandru and Balmez, Raul and Avram, Adrian and Orhei, Ciprian and Cosmin, Ancuti},
+- Python 3.8+
+- TensorFlow 2.x
+- numpy
+- Pillow
+- scikit-image
+
+> The model is implemented in **TensorFlow** and was trained on a single NVIDIA GeForce RTX 4060 (8 GB) GPU.
+
+---
+
+## Usage
+
+### Training
+
+```bash
+python train.py \
+  --data_dir data/LOL \
+  --epochs 200 \
+  --batch_size 8 \
+  --lr 2e-4
+```
+
+### Evaluation
+
+```bash
+# Evaluate on LOL-v1 (in-domain)
+python evaluate.py \
+  --dataset LOL-v1 \
+  --data_dir data/LOL/eval15 \
+  --checkpoint checkpoints/best_model.h5
+
+# Evaluate on LOLI-Street (out-of-domain)
+python evaluate.py \
+  --dataset LOLI-Street \
+  --data_dir data/LOLI-Street \
+  --checkpoint checkpoints/best_model.h5
+```
+
+### Inference on a single image
+
+```bash
+python infer.py \
+  --input path/to/low_light_image.jpg \
+  --output path/to/output.jpg \
+  --checkpoint checkpoints/best_model.h5
+```
+
+---
+
+## Project Structure
+
+```
+├── data/
+│   ├── LOL/
+│   ├── LOL-v2-Real/
+│   └── LOLI-Street/
+├── models/
+│   ├── lyt_net.py              # Original LYT-Net architecture
+│   └── lyt_net_modified.py     # Our modified architecture (D1, D2, D3)
+├── checkpoints/
+├── train.py
+├── evaluate.py
+├── infer.py
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Citation
+
+If you use this work, please also cite the original LYT-Net paper:
+
+```bibtex
+@article{brateanu2024lytnet,
+  title={LYT-Net: Lightweight YUV Transformer-based Network for Low-light Image Enhancement},
+  author={Brateanu, Alexandru and Balmez, Raul and Avram, Adrian and Orhei, Ciprian},
   journal={arXiv preprint arXiv:2401.15204},
   year={2024}
 }
 ```
+
+---
+
+## Acknowledgements
+
+This project is built upon [LYT-Net](https://github.com/albrateanu/LYT-Net). We thank the original authors for their open-source contribution.
+
+This work was completed as part of a course project at **Yuan Ze University**, Department of Computer Science and Engineering.
+
+---
+
+## License
+
+This project is released for academic and educational use only.
 # final_project
